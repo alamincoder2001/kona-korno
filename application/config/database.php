@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 $active_group = 'default';
 $query_builder = TRUE;
@@ -7,15 +7,15 @@ $query_builder = TRUE;
 $db['default'] = array(
 	'dsn'	=> '',
 	'hostname' => 'localhost',
-	
-  	// 'username' => 'dewbxcak_erp',
-  	// 'password' => 'M;ew$,R0*OY*',
-  	// 'database' => 'dewbxcak_erp',
-	
+
+	// 'username' => 'dewbxcak_admin3',
+	// 'password' => ')&@)nVVDO$]_',
+	// 'database' => 'dewbxcak_erp',
+
 	'username' => 'root',
 	'password' => '',
 	'database' => 'kona_korno',
-		
+
 
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
