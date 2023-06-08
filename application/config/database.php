@@ -10,7 +10,7 @@ $db['default'] = array(
 
 	// 'username' => 'dewbxcak_admin3',
 	// 'password' => ')&@)nVVDO$]_',
-	// 'database' => 'dewbxcak_erp',
+	// 'database' => 'dewbxcak_kona-kornoenterprise',
 
 	'username' => 'root',
 	'password' => '',
