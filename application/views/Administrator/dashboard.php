@@ -28,9 +28,9 @@ if ($module == 'dashboard' or $module == '') { ?>
 			<div class="col-md-12 header" style="height: 130px;">
 				<img src="<?php echo base_url(); ?>assets/images/big_logo.jpg" class="img img-responsive center-block">
 			</div>
-			<div class="col-md-10 col-md-offset-1">
+			<div class="col-md-10 col-md-offset-1 col-xs-12">
 				<div class="col-md-3 section4">
-					<div class="col-md-12 section122" style="background-color:#e1e1ff;" onmouseover="this.style.background = '#d2d2ff'" onmouseout="this.style.background = '#e1e1ff'">
+					<div class="col-md-12 col-xs-12 section122" style="background-color:#e1e1ff;" onmouseover="this.style.background = '#d2d2ff'" onmouseout="this.style.background = '#e1e1ff'">
 						<a href="<?php echo base_url(); ?>module/SalesModule">
 							<div class="logo">
 								<i class="fa fa-usd"></i>
@@ -42,8 +42,8 @@ if ($module == 'dashboard' or $module == '') { ?>
 					</div>
 				</div>
 
-				<div class="col-md-3 col-xs-6 section4">
-					<div class="col-md-12 section122" style="background-color:#ffe3d7;" onmouseover="this.style.background = '#ffc0a6'" onmouseout="this.style.background = '#ffe3d7'">
+				<div class="col-md-3 section4">
+					<div class="col-md-12 col-xs-12 section122" style="background-color:#ffe3d7;" onmouseover="this.style.background = '#ffc0a6'" onmouseout="this.style.background = '#ffe3d7'">
 						<a href="<?php echo base_url(); ?>module/OrderModule">
 							<div class="logo">
 								<i class="fa fa-usd"></i>
