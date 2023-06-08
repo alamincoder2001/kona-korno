@@ -47,28 +47,28 @@
 	<div class="col-xs-12 col-md-12 col-lg-12" style="border-bottom:1px #ccc solid;margin-bottom:5px;">
 		<div class="row">
 			<div class="form-group">
-				<label class="col-sm-1 control-label no-padding-right"> Invoice no </label>
-				<div class="col-sm-2">
+				<label class="col-md-1 col-xs-4 control-label no-padding-right"> Invoice no </label>
+				<div class="col-md-2 col-xs-8">
 					<input type="text" id="invoiceNo" class="form-control" v-model="sales.invoiceNo" readonly />
 				</div>
 			</div>
 
 			<div class="form-group">
-				<label class="col-sm-1 control-label no-padding-right"> Order By </label>
-				<div class="col-sm-2">
+				<label class="col-md-1 col-xs-4 control-label no-padding-right"> Order By </label>
+				<div class="col-md-2 col-xs-8">
 					<v-select v-bind:options="employees" v-model="selectedEmployee" label="Employee_Name" placeholder="Select Employee"></v-select>
 				</div>
 			</div>
 
 			<div class="form-group">
-				<label class="col-sm-1 control-label no-padding-right"> Order From </label>
-				<div class="col-sm-2">
+				<label class="col-md-1 col-xs-4 control-label no-padding-right"> Order From </label>
+				<div class="col-md-2 col-xs-8">
 					<v-select id="branchDropdown" v-bind:options="branches" label="Brunch_name" v-model="selectedBranch" disabled></v-select>
 				</div>
 			</div>
 
 			<div class="form-group">
-				<div class="col-sm-3">
+				<div class="col-md-3 col-xs-12">
 					<input class="form-control" id="salesDate" type="date" v-model="sales.salesDate" v-bind:disabled="userType == 'u' ? true : false" />
 				</div>
 			</div>
@@ -95,7 +95,7 @@
 				<div class="widget-main">
 
 					<div class="row">
-						<div class="col-sm-5">
+						<div class="col-md-5 col-xs-12">
 							<div class="form-group clearfix" style="margin-bottom: 8px;">
 								<label class="col-xs-4 control-label no-padding-right"> Order Type </label>
 								<div class="col-xs-8">
@@ -135,7 +135,7 @@
 							</div>
 						</div>
 
-						<div class="col-sm-5">
+						<div class="col-md-5 col-xs-12">
 							<form v-on:submit.prevent="addToCart">
 								<div class="form-group">
 									<label class="col-xs-3 control-label no-padding-right"> Product </label>
@@ -165,8 +165,8 @@
 									<div class="col-xs-4">
 										<input type="number" step="0.01" id="quantity" placeholder="Qty" class="form-control" ref="quantity" v-model="selectedProduct.boxQty" v-on:input="productTotal" autocomplete="off" required />
 									</div>
-									<div class="col-sm-1">Pcs</div>
-									<div class="col-sm-4">
+									<div class="col-xs-1">Pcs</div>
+									<div class="col-xs-4">
 										<input type="number" class="form-control" min="0" v-model="selectedProduct.pcs" v-on:input="productTotal">
 									</div>
 								</div>
@@ -194,7 +194,7 @@
 							</form>
 
 						</div>
-						<div class="col-sm-2">
+						<div class="col-md-2 col-xs-12">
 							<div style="display:none;" v-bind:style="{display:sales.isService == 'true' ? 'none' : ''}">
 								<div class="text-center" style="display:none;" v-bind:style="{color: productStock > 0 ? 'green' : 'red', display: selectedProduct.Product_SlNo == '' ? 'none' : ''}">{{ productStockText }}</div class="text-center">
 
@@ -355,8 +355,8 @@
 									<tr>
 										<td>
 											<div class="form-group">
-												<label class="col-sm-12 control-label no-padding-right">Payment Type</label>
-												<div class="col-sm-12">
+												<label class="col-xs-12 control-label no-padding-right">Payment Type</label>
+												<div class="col-xs-12">
 													<select class="form-control" style="padding: 0;" name="payment_type" id="payment_type" v-model="sales.payment_type">
 														<option value="Cash">Cash</option>
 														<option value="Bank">Bank</option>
@@ -369,9 +369,9 @@
 									<tr v-if="sales.payment_type == 'Bank'">
 										<td>
 											<div class="form-group">
-												<label class="col-sm-12 control-label no-padding-right">Bank
+												<label class="col-xs-12 control-label no-padding-right">Bank
 													Account</label>
-												<div class="col-sm-12">
+												<div class="col-xs-12">
 													<v-select v-bind:options="accounts" v-model="selectedAcount" label="display_text" placeholder="Select account"></v-select>
 												</div>
 											</div>
@@ -628,6 +628,9 @@
 				})
 			},
 			async productOnChange() {
+				if (this.selectedProduct.Product_SlNo == '') {
+					return;
+				}
 				if ((this.selectedProduct.Product_SlNo != '' || this.selectedProduct.Product_SlNo != 0) && this.sales.isService == 'false') {
 					this.productStock = await axios.post('/get_product_stock', {
 						productId: this.selectedProduct.Product_SlNo
@@ -637,6 +640,7 @@
 
 					this.productStockText = this.productStock > 0 ? "Available Stock" : "Stock Unavailable";
 				}
+				this.selectedProduct.boxQty = 0
 
 				this.$refs.quantity.focus();
 			},

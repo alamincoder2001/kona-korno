@@ -1,11 +1,13 @@
-<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
-class Order extends CI_Controller {
-    public function __construct() {
+class Order extends CI_Controller
+{
+    public function __construct()
+    {
         parent::__construct();
         $this->sbrunch = $this->session->userdata('BRANCHid');
         $access = $this->session->userdata('userId');
-         if($access == '' ){
+        if ($access == '') {
             redirect("Login");
         }
         $this->load->model('Billing_model');
@@ -14,16 +16,17 @@ class Order extends CI_Controller {
         $this->load->helper('form');
         $this->load->model('SMS_model', 'sms', true);
     }
-    
-    public function index()  {
+
+    public function index()
+    {
         $access = $this->mt->userAccess();
-        if(!$access){
+        if (!$access) {
             redirect(base_url());
         }
         $this->cart->destroy();
         $this->session->unset_userdata('cheque');
         $data['title'] = "Product Order";
-        
+
         $invoice = $this->mt->generateSalesInvoice();
 
         $data['isService'] = 'false';
@@ -32,21 +35,22 @@ class Order extends CI_Controller {
         $data['content'] = $this->load->view('Administrator/order/product_order', $data, TRUE);
         $this->load->view('Administrator/index', $data);
     }
-    
 
-    public function addOrder(){
-        $res = ['success'=>false, 'message'=>''];
-        try{
+
+    public function addOrder()
+    {
+        $res = ['success' => false, 'message' => ''];
+        try {
             $data = json_decode($this->input->raw_input_stream);
 
             $invoice = $data->sales->invoiceNo;
             $invoiceCount = $this->db->query("select * from tbl_salesmaster where SaleMaster_InvoiceNo = ?", $invoice)->num_rows();
-            if($invoiceCount != 0){
+            if ($invoiceCount != 0) {
                 $invoice = $this->mt->generateSalesInvoice();
             }
 
             $customerId = $data->sales->customerId;
-            if(isset($data->customer)){
+            if (isset($data->customer)) {
                 $customer = (array)$data->customer;
                 unset($customer['Customer_SlNo']);
                 unset($customer['display_name']);
@@ -84,12 +88,12 @@ class Order extends CI_Controller {
                 'AddTime'                        => date("Y-m-d H:i:s"),
                 'SaleMaster_branchid'            => $this->session->userdata("BRANCHid")
             );
-    
+
             $this->db->insert('tbl_salesmaster', $sales);
-            
+
             $salesId = $this->db->insert_id();
-    
-            foreach($data->cart as $cartProduct){
+
+            foreach ($data->cart as $cartProduct) {
                 $saleDetails = array(
                     'SaleMaster_IDNo' => $salesId,
                     'Product_IDNo' => $cartProduct->productId,
@@ -103,9 +107,9 @@ class Order extends CI_Controller {
                     'AddTime' => date('Y-m-d H:i:s'),
                     'SaleDetails_BranchId' => $this->session->userdata('BRANCHid')
                 );
-    
+
                 $this->db->insert('tbl_saledetails', $saleDetails);
-    
+
                 //update stock
                 // $this->db->query("
                 //     update tbl_currentinventory 
@@ -114,26 +118,27 @@ class Order extends CI_Controller {
                 //     and branch_id = ?
                 // ", [$cartProduct->quantity, $cartProduct->productId, $this->session->userdata('BRANCHid')]);
             }
-            $currentDue = $data->sales->previousDue + ($data->sales->total - $data->sales->paid);
+
             //Send sms
-            $customerInfo = $this->db->query("select * from tbl_customer where Customer_SlNo = ?", $customerId)->row();
-            $sendToName = $customerInfo->owner_name != '' ? $customerInfo->owner_name : $customerInfo->Customer_Name;
-            $currency = $this->session->userdata('Currency_Name');
+            // $currentDue = $data->sales->previousDue + ($data->sales->total - $data->sales->paid);
+            // $customerInfo = $this->db->query("select * from tbl_customer where Customer_SlNo = ?", $customerId)->row();
+            // $sendToName = $customerInfo->owner_name != '' ? $customerInfo->owner_name : $customerInfo->Customer_Name;
+            // $currency = $this->session->userdata('Currency_Name');
 
-            $message = "Dear {$sendToName},\nYour bill is {$currency} {$data->sales->total}. Received {$currency} {$data->sales->paid} and current due is {$currency} {$currentDue} for invoice {$invoice}";
-            $recipient = $customerInfo->Customer_Mobile;
-            $this->sms->sendSms($recipient, $message);
-    
-            $res = ['success'=>true, 'message'=>'Order Success', 'salesId'=>$salesId];
+            // $message = "Dear {$sendToName},\nYour bill is {$currency} {$data->sales->total}. Received {$currency} {$data->sales->paid} and current due is {$currency} {$currentDue} for invoice {$invoice}";
+            // $recipient = $customerInfo->Customer_Mobile;
+            // $this->sms->sendSms($recipient, $message);
 
-        } catch (Exception $ex){
-            $res = ['success'=>false, 'message'=>$ex->getMessage()];
+            $res = ['success' => true, 'message' => 'Order Success', 'salesId' => $salesId];
+        } catch (Exception $ex) {
+            $res = ['success' => false, 'message' => $ex->getMessage()];
         }
 
         echo json_encode($res);
     }
 
-    public function OrderEdit($salesId){
+    public function OrderEdit($salesId)
+    {
         $data['title'] = "Order update";
         $sales = $this->db->query("select * from tbl_salesmaster where SaleMaster_SlNo = ?", $salesId)->row();
         $data['isService'] = 'false';
@@ -144,13 +149,14 @@ class Order extends CI_Controller {
     }
 
 
-    public function updateOrder(){
-        $res = ['success'=>false, 'message'=>''];
-        try{
+    public function updateOrder()
+    {
+        $res = ['success' => false, 'message' => ''];
+        try {
             $data = json_decode($this->input->raw_input_stream);
             $salesId = $data->sales->salesId;
 
-            if(isset($data->customer)){
+            if (isset($data->customer)) {
                 $customer = (array)$data->customer;
                 unset($customer['Customer_SlNo']);
                 unset($customer['display_name']);
@@ -181,14 +187,14 @@ class Order extends CI_Controller {
                 'UpdateTime'                     => date("Y-m-d H:i:s"),
                 "SaleMaster_branchid"            => $this->session->userdata("BRANCHid")
             );
-    
+
             $this->db->where('SaleMaster_SlNo', $salesId);
             $this->db->update('tbl_salesmaster', $sales);
-            
+
             $currentSaleDetails = $this->db->query("select * from tbl_saledetails where SaleMaster_IDNo = ?", $salesId)->result();
             $this->db->query("delete from tbl_saledetails where SaleMaster_IDNo = ?", $salesId);
 
-            foreach($currentSaleDetails as $product){
+            foreach ($currentSaleDetails as $product) {
                 $this->db->query("
                     update tbl_currentinventory 
                     set sales_quantity = sales_quantity - ? 
@@ -196,8 +202,8 @@ class Order extends CI_Controller {
                     and branch_id = ?
                 ", [$product->SaleDetails_TotalQuantity, $product->Product_IDNo, $this->session->userdata('BRANCHid')]);
             }
-    
-            foreach($data->cart as $cartProduct){
+
+            foreach ($data->cart as $cartProduct) {
                 $saleDetails = array(
                     'SaleMaster_IDNo' => $salesId,
                     'Product_IDNo' => $cartProduct->productId,
@@ -211,69 +217,71 @@ class Order extends CI_Controller {
                     'AddTime' => date('Y-m-d H:i:s'),
                     'SaleDetails_BranchId' => $this->session->userdata("BRANCHid")
                 );
-    
-                $this->db->insert('tbl_saledetails', $saleDetails);
-    
-                // $this->db->query("
-                //     update tbl_currentinventory 
-                //     set sales_quantity = sales_quantity + ? 
-                //     where product_id = ?
-                //     and branch_id = ?
-                // ", [$cartProduct->quantity, $cartProduct->productId, $this->session->userdata('BRANCHid')]);
-            }
-    
-            $res = ['success'=>true, 'message'=>'Order Updated', 'salesId'=>$salesId];
 
-        } catch (Exception $ex){
-            $res = ['success'=>false, 'message'=>$ex->getMessage()];
+                $this->db->insert('tbl_saledetails', $saleDetails);
+
+                $this->db->query("
+                    update tbl_currentinventory 
+                    set sales_quantity = sales_quantity + ? 
+                    where product_id = ?
+                    and branch_id = ?
+                ", [$cartProduct->quantity, $cartProduct->productId, $this->session->userdata('BRANCHid')]);
+            }
+
+            $res = ['success' => true, 'message' => 'Order Updated', 'salesId' => $salesId];
+        } catch (Exception $ex) {
+            $res = ['success' => false, 'message' => $ex->getMessage()];
         }
 
         echo json_encode($res);
     }
 
-    public function order_invoice()  {
+    public function order_invoice()
+    {
         $access = $this->mt->userAccess();
-        if(!$access){
+        if (!$access) {
             redirect(base_url());
         }
-        $data['title'] = "Order Invoice"; 
-		$data['content'] = $this->load->view('Administrator/order/order_invoice', $data, TRUE);
+        $data['title'] = "Order Invoice";
+        $data['content'] = $this->load->view('Administrator/order/order_invoice', $data, TRUE);
         $this->load->view('Administrator/index', $data);
     }
 
-    public function orderInvoicePrint($saleId)  {
+    public function orderInvoicePrint($saleId)
+    {
         $data['title'] = "Order Invoice";
         $data['salesId'] = $saleId;
         $data['content'] = $this->load->view('Administrator/order/orderAndreport', $data, TRUE);
         $this->load->view('Administrator/index', $data);
     }
 
-    public function getOrders(){
+    public function getOrders()
+    {
         $data = json_decode($this->input->raw_input_stream);
         $branchId = $this->session->userdata("BRANCHid");
 
         $clauses = "";
-        if(isset($data->dateFrom) && $data->dateFrom != '' && isset($data->dateTo) && $data->dateTo != ''){
+        if (isset($data->dateFrom) && $data->dateFrom != '' && isset($data->dateTo) && $data->dateTo != '') {
             $clauses .= " and sm.SaleMaster_SaleDate between '$data->dateFrom' and '$data->dateTo'";
         }
 
-        if(isset($data->userFullName) && $data->userFullName != ''){
+        if (isset($data->userFullName) && $data->userFullName != '') {
             $clauses .= " and sm.AddBy = '$data->userFullName'";
         }
 
-        if(isset($data->customerId) && $data->customerId != ''){
+        if (isset($data->customerId) && $data->customerId != '') {
             $clauses .= " and sm.SalseCustomer_IDNo = '$data->customerId'";
         }
 
-        if(isset($data->employeeId) && $data->employeeId != ''){
+        if (isset($data->employeeId) && $data->employeeId != '') {
             $clauses .= " and sm.employee_id = '$data->employeeId'";
         }
 
-        if(isset($data->customerType) && $data->customerType != ''){
+        if (isset($data->customerType) && $data->customerType != '') {
             $clauses .= " and c.Customer_Type = '$data->customerType'";
         }
 
-        if(isset($data->salesId) && $data->salesId != 0 && $data->salesId != ''){
+        if (isset($data->salesId) && $data->salesId != 0 && $data->salesId != '') {
             $clauses .= " and SaleMaster_SlNo = '$data->salesId'";
             $saleDetails = $this->db->query("
                 select 
@@ -291,10 +299,10 @@ class Order extends CI_Controller {
                 where sd.SaleMaster_IDNo = ?
                 and sd.Status != 'd'
             ", $data->salesId)->result();
-    
+
             $res['saleDetails'] = $saleDetails;
 
-            $saleDetails = array_map(function($detail) {
+            $saleDetails = array_map(function ($detail) {
                 $detail->quantity_text = floor($detail->SaleDetails_TotalQuantity / $detail->per_unit_convert) . ' ' . $detail->Unit_Name . ' ' . $detail->SaleDetails_TotalQuantity % $detail->per_unit_convert . ' ' . $detail->converted_name;
                 return $detail;
             }, $saleDetails);
@@ -325,40 +333,42 @@ class Order extends CI_Controller {
             $clauses
             order by sm.SaleMaster_SlNo desc
         ")->result();
-        
+
         $res['sales'] = $sales;
 
         echo json_encode($res);
     }
-    
-    
-    function order_record()  {
+
+
+    function order_record()
+    {
         $access = $this->mt->userAccess();
-        if(!$access){
+        if (!$access) {
             redirect(base_url());
         }
-        $data['title'] = "Order Record";  
+        $data['title'] = "Order Record";
         $data['content'] = $this->load->view('Administrator/order/order_record', $data, TRUE);
-        $this->load->view('Administrator/index', $data); 
+        $this->load->view('Administrator/index', $data);
     }
 
-    public function getOrderRecord(){
+    public function getOrderRecord()
+    {
         $data = json_decode($this->input->raw_input_stream);
         $branchId = $this->session->userdata("BRANCHid");
         $clauses = "";
-        if(isset($data->dateFrom) && $data->dateFrom != '' && isset($data->dateTo) && $data->dateTo != ''){
+        if (isset($data->dateFrom) && $data->dateFrom != '' && isset($data->dateTo) && $data->dateTo != '') {
             $clauses .= " and sm.SaleMaster_SaleDate between '$data->dateFrom' and '$data->dateTo'";
         }
 
-        if(isset($data->userFullName) && $data->userFullName != ''){
+        if (isset($data->userFullName) && $data->userFullName != '') {
             $clauses .= " and sm.AddBy = '$data->userFullName'";
         }
 
-        if(isset($data->customerId) && $data->customerId != ''){
+        if (isset($data->customerId) && $data->customerId != '') {
             $clauses .= " and sm.SalseCustomer_IDNo = '$data->customerId'";
         }
 
-        if(isset($data->employeeId) && $data->employeeId != ''){
+        if (isset($data->employeeId) && $data->employeeId != '') {
             $clauses .= " and sm.employee_id = '$data->employeeId'";
         }
 
@@ -387,7 +397,7 @@ class Order extends CI_Controller {
             order by sm.SaleMaster_SlNo desc
         ")->result();
 
-        foreach($sales as $sale){
+        foreach ($sales as $sale) {
             $sale->saleDetails = $this->db->query("
                 select 
                     sd.*,
@@ -404,23 +414,24 @@ class Order extends CI_Controller {
         echo json_encode($sales);
     }
 
-    public function getOrderDetails(){
+    public function getOrderDetails()
+    {
         $data = json_decode($this->input->raw_input_stream);
 
         $clauses = "";
-        if(isset($data->customerId) && $data->customerId != ''){
+        if (isset($data->customerId) && $data->customerId != '') {
             $clauses .= " and c.Customer_SlNo = '$data->customerId'";
         }
 
-        if(isset($data->productId) && $data->productId != ''){
+        if (isset($data->productId) && $data->productId != '') {
             $clauses .= " and p.Product_SlNo = '$data->productId'";
         }
 
-        if(isset($data->categoryId) && $data->categoryId != ''){
+        if (isset($data->categoryId) && $data->categoryId != '') {
             $clauses .= " and pc.ProductCategory_SlNo = '$data->categoryId'";
         }
 
-        if(isset($data->dateFrom) && $data->dateFrom != '' && isset($data->dateTo) && $data->dateTo != ''){
+        if (isset($data->dateFrom) && $data->dateFrom != '' && isset($data->dateTo) && $data->dateTo != '') {
             $clauses .= " and sm.SaleMaster_SaleDate between '$data->dateFrom' and '$data->dateTo'";
         }
 
@@ -448,15 +459,16 @@ class Order extends CI_Controller {
         echo json_encode($saleDetails);
     }
 
-    public function  deleteOrder(){
-        $res = ['success'=>false, 'message'=>''];
-        try{
+    public function  deleteOrder()
+    {
+        $res = ['success' => false, 'message' => ''];
+        try {
             $data = json_decode($this->input->raw_input_stream);
             $saleId = $data->saleId;
 
             $sale = $this->db->select('*')->where('SaleMaster_SlNo', $saleId)->get('tbl_salesmaster')->row();
-            if($sale->Status != 'p'){
-                $res = ['success'=>false, 'message'=>'Order not found'];
+            if ($sale->Status != 'p') {
+                $res = ['success' => false, 'message' => 'Order not found'];
                 echo json_encode($res);
                 exit;
             }
@@ -464,8 +476,13 @@ class Order extends CI_Controller {
             /*Get Sale Details Data*/
             $saleDetails = $this->db->select('Product_IDNo, SaleDetails_TotalQuantity')->where('SaleMaster_IDNo', $saleId)->get('tbl_saledetails')->result();
 
-            foreach ($saleDetails as $detail){
-                
+            foreach ($saleDetails as $detail) {
+                $this->db->query("
+                    update tbl_currentinventory 
+                    set sales_quantity = sales_quantity - ? 
+                    where product_id = ?
+                    and branch_id = ?
+                ", [$detail->SaleDetails_TotalQuantity, $detail->Product_IDNo, $this->session->userdata('BRANCHid')]);
             }
 
             /*Delete order Details*/
@@ -473,35 +490,36 @@ class Order extends CI_Controller {
 
             /*Delete Sale Master Data*/
             $this->db->set('Status', 'd')->where('SaleMaster_SlNo', $saleId)->update('tbl_salesmaster');
-            $res = ['success'=>true, 'message'=>'Order deleted'];
-        } catch (Exception $ex){
-            $res = ['success'=>false, 'message'=>$ex->getMessage()];
+            $res = ['success' => true, 'message' => 'Order deleted'];
+        } catch (Exception $ex) {
+            $res = ['success' => false, 'message' => $ex->getMessage()];
         }
 
         echo json_encode($res);
     }
 
-    public function  deleveredOrder(){
-        $res = ['success'=>false, 'message'=>''];
-        try{
+    public function  deleveredOrder()
+    {
+        $res = ['success' => false, 'message' => ''];
+        try {
             $data = json_decode($this->input->raw_input_stream);
             $saleId = $data->saleId;
 
             $sale = $this->db->select('*')->where('SaleMaster_SlNo', $saleId)->get('tbl_salesmaster')->row();
-            if($sale->Status != 'p'){
-                $res = ['success'=>false, 'message'=>'Order not found'];
+            if ($sale->Status != 'p') {
+                $res = ['success' => false, 'message' => 'Order not found'];
                 echo json_encode($res);
                 exit;
             }
-            
+
 
             /*Get Sale Details Data*/
             $saleDetails = $this->db->select('Product_IDNo, SaleDetails_TotalQuantity')->where('SaleMaster_IDNo', $saleId)->get('tbl_saledetails')->result();
 
-            foreach($saleDetails as $product) {
+            foreach ($saleDetails as $product) {
                 $stock = $this->mt->productStock($product->Product_IDNo);
-                if($product->SaleDetails_TotalQuantity > $stock) {
-                    $res = ['success'=>false, 'message'=>'Stock Unavailable'];
+                if ($product->SaleDetails_TotalQuantity > $stock) {
+                    $res = ['success' => false, 'message' => 'Stock Unavailable'];
                     echo json_encode($res);
                     exit;
                 }
@@ -513,21 +531,20 @@ class Order extends CI_Controller {
             /*deliver Sale Master Data*/
             $this->db->set('Status', 'a')->where('SaleMaster_SlNo', $saleId)->update('tbl_salesmaster');
 
-            foreach ($saleDetails as $detail){
+            foreach ($saleDetails as $detail) {
 
                 /*Update Sales Inventory*/
                 $this->db->query("
                     update tbl_currentinventory 
-                    set sales_quantity = sales_quantity + ? 
+                    set sales_quantity = sales_quantity - ? 
                     where product_id = ?
                     and branch_id = ?
                 ", [$detail->SaleDetails_TotalQuantity, $detail->Product_IDNo, $this->session->userdata('BRANCHid')]);
-
             }
 
-            $res = ['success'=>true, 'message'=>'Order Delivery success'];
-        } catch (Exception $ex){
-            $res = ['success'=>false, 'message'=>$ex->getMessage()];
+            $res = ['success' => true, 'message' => 'Order Delivery success'];
+        } catch (Exception $ex) {
+            $res = ['success' => false, 'message' => $ex->getMessage()];
         }
 
         echo json_encode($res);
@@ -536,12 +553,12 @@ class Order extends CI_Controller {
     public function deliveryOrder()
     {
         $access = $this->mt->userAccess();
-        if(!$access){
+        if (!$access) {
             redirect(base_url());
         }
-        $data['title'] = "Delivery Order Record";  
+        $data['title'] = "Delivery Order Record";
         $data['content'] = $this->load->view('Administrator/order/order_delivery_record', $data, TRUE);
-        $this->load->view('Administrator/index', $data); 
+        $this->load->view('Administrator/index', $data);
     }
 
     public function getDeliveryOrder()
@@ -568,6 +585,4 @@ class Order extends CI_Controller {
 
         echo json_encode($query);
     }
-
-
 }

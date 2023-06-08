@@ -162,7 +162,7 @@
 									<!-- <a href="" title="Chalan" v-bind:href="`/chalan/${sale.SaleMaster_SlNo}`" target="_blank"><i class="fa fa-file-o"></i></a> -->
 									<?php if($this->session->userdata('accountType') != 'u'){?>
 									<a href="javascript:" title="Edit Order" @click="checkReturnAndEdit(sale)"><i class="fa fa-edit"></i></a>
-									<a href="" title="Order Delivered" @click.prevent="deliveryOrder(sale.SaleMaster_SlNo)"><i class="fa fa-truck"></i></a>
+									<a href="" v-if="sale.Status != 'a'" title="Order Delivered" @click.prevent="deliveryOrder(sale.SaleMaster_SlNo)"><i class="fa fa-truck"></i></a>
 									<a href="" title="Delete Order" @click.prevent="deleteSale(sale.SaleMaster_SlNo)"><i class="fa fa-trash"></i></a>
 
 									<?php }?>
@@ -235,7 +235,7 @@
 								<?php if($this->session->userdata('accountType') != 'u'){?>
 								<a href="javascript:" title="Edit Order" @click="checkReturnAndEdit(sale)"><i class="fa fa-edit"></i></a>
 								
-								<a href="" title="Order Delivered" @click.prevent="deliveryOrder(sale.SaleMaster_SlNo)"><i class="fa fa-truck"></i></a>
+								<a href="" v-if="sale.Status != 'a'" title="Order Delivered" @click.prevent="deliveryOrder(sale.SaleMaster_SlNo)"><i class="fa fa-truck"></i></a>
 
 								<a href="" title="Delete Order" @click.prevent="deleteSale(sale.SaleMaster_SlNo)"><i class="fa fa-trash"></i></a>
 
