@@ -350,7 +350,7 @@ class Sales extends CI_Controller {
             $res['saleDetails'] = $saleDetails;
 
             $saleDetails = array_map(function($detail) {
-                $detail->quantity_text = floor($detail->SaleDetails_TotalQuantity / $detail->per_unit_convert) . ' ' . $detail->Unit_Name . ' ' . $detail->SaleDetails_TotalQuantity % $detail->per_unit_convert . ' ' . $detail->converted_name;
+                $detail->quantity_text = floor($detail->SaleDetails_TotalQuantity / $detail->per_unit_convert) . ' ' . $detail->converted_name . ' ' . $detail->SaleDetails_TotalQuantity % $detail->per_unit_convert . ' ' . $detail->Unit_Name;
                 return $detail;
             }, $saleDetails);
         }

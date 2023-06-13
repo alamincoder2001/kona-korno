@@ -98,8 +98,8 @@
 					<div class="col-md-2 no-padding-right">
 						<input type="number" min="0" class="form-control" v-model="product.per_unit_convert" required>
 					</div>
-					<label class="control-label col-md-2 no-padding-right">Conv. Name:</label>
-					<div class="col-md-3 no-padding-left">
+					<label class="control-label col-md-2 no-padding-right">Conv. Unit:</label>
+					<div class="col-md-3">
 						<input type="text" class="form-control" v-model="product.converted_name" placeholder="Converted Name" required>
 					</div>
 				</div>

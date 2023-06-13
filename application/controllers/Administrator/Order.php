@@ -182,7 +182,7 @@ class Order extends CI_Controller
                 'SaleMaster_Description'         => $data->sales->note,
                 'payment_type'                   => $data->sales->payment_type,
                 'account_id'                     => $data->sales->account_id,
-                'Status'                         => 'a',
+                'Status'                         => $data->sales->Status,
                 "UpdateBy"                       => $this->session->userdata("FullName"),
                 'UpdateTime'                     => date("Y-m-d H:i:s"),
                 "SaleMaster_branchid"            => $this->session->userdata("BRANCHid")
@@ -192,40 +192,43 @@ class Order extends CI_Controller
             $this->db->update('tbl_salesmaster', $sales);
 
             $currentSaleDetails = $this->db->query("select * from tbl_saledetails where SaleMaster_IDNo = ?", $salesId)->result();
-            $this->db->query("delete from tbl_saledetails where SaleMaster_IDNo = ?", $salesId);
-
             foreach ($currentSaleDetails as $product) {
-                $this->db->query("
-                    update tbl_currentinventory 
-                    set sales_quantity = sales_quantity - ? 
-                    where product_id = ?
-                    and branch_id = ?
-                ", [$product->SaleDetails_TotalQuantity, $product->Product_IDNo, $this->session->userdata('BRANCHid')]);
+                if ($product->Status == 'a') {
+                    $this->db->query("
+                        update tbl_currentinventory 
+                        set sales_quantity = sales_quantity - ? 
+                        where product_id = ?
+                        and branch_id = ?
+                    ", [$product->SaleDetails_TotalQuantity, $product->Product_IDNo, $this->session->userdata('BRANCHid')]);
+                }
             }
+            $this->db->query("delete from tbl_saledetails where SaleMaster_IDNo = ?", $salesId);
 
             foreach ($data->cart as $cartProduct) {
                 $saleDetails = array(
-                    'SaleMaster_IDNo' => $salesId,
-                    'Product_IDNo' => $cartProduct->productId,
+                    'SaleMaster_IDNo'           => $salesId,
+                    'Product_IDNo'              => $cartProduct->productId,
                     'SaleDetails_TotalQuantity' => $cartProduct->quantity,
-                    'Purchase_Rate' => $cartProduct->purchaseRate,
-                    'SaleDetails_Rate' => $cartProduct->salesRate,
-                    'SaleDetails_Tax' => $cartProduct->vat,
-                    'SaleDetails_TotalAmount' => $cartProduct->total,
-                    'Status' => 'a',
-                    'AddBy' => $this->session->userdata("FullName"),
-                    'AddTime' => date('Y-m-d H:i:s'),
-                    'SaleDetails_BranchId' => $this->session->userdata("BRANCHid")
+                    'Purchase_Rate'             => $cartProduct->purchaseRate,
+                    'SaleDetails_Rate'          => $cartProduct->salesRate,
+                    'SaleDetails_Tax'           => $cartProduct->vat,
+                    'SaleDetails_TotalAmount'   => $cartProduct->total,
+                    'Status'                    => $data->sales->Status,
+                    'AddBy'                     => $this->session->userdata("FullName"),
+                    'AddTime'                   => date('Y-m-d H:i:s'),
+                    'SaleDetails_BranchId'      => $this->session->userdata("BRANCHid")
                 );
 
                 $this->db->insert('tbl_saledetails', $saleDetails);
 
-                $this->db->query("
-                    update tbl_currentinventory 
-                    set sales_quantity = sales_quantity + ? 
-                    where product_id = ?
-                    and branch_id = ?
-                ", [$cartProduct->quantity, $cartProduct->productId, $this->session->userdata('BRANCHid')]);
+                if ($data->sales->Status == 'a') {
+                    $this->db->query("
+                        update tbl_currentinventory 
+                        set sales_quantity = sales_quantity + ? 
+                        where product_id = ?
+                        and branch_id = ?
+                    ", [$cartProduct->quantity, $cartProduct->productId, $this->session->userdata('BRANCHid')]);
+                }
             }
 
             $res = ['success' => true, 'message' => 'Order Updated', 'salesId' => $salesId];
@@ -261,12 +264,15 @@ class Order extends CI_Controller
         $branchId = $this->session->userdata("BRANCHid");
 
         $clauses = "";
+
+        $status_detail = " and sd.Status != 'd'";
+        $status_sale = " and sm.Status != 'd'";
+        if (isset($data->Status) && $data->Status != '') {
+            $status_detail = " and sd.Status = '$data->Status'";
+            $status_sale = " and sm.Status = '$data->Status'";
+        }
         if (isset($data->dateFrom) && $data->dateFrom != '' && isset($data->dateTo) && $data->dateTo != '') {
             $clauses .= " and sm.SaleMaster_SaleDate between '$data->dateFrom' and '$data->dateTo'";
-        }
-
-        if (isset($data->userFullName) && $data->userFullName != '') {
-            $clauses .= " and sm.AddBy = '$data->userFullName'";
         }
 
         if (isset($data->customerId) && $data->customerId != '') {
@@ -297,13 +303,13 @@ class Order extends CI_Controller
                 join tbl_productcategory pc on pc.ProductCategory_SlNo = p.ProductCategory_ID
                 join tbl_unit u on u.Unit_SlNo = p.Unit_ID
                 where sd.SaleMaster_IDNo = ?
-                and sd.Status != 'd'
+                $status_detail
             ", $data->salesId)->result();
 
             $res['saleDetails'] = $saleDetails;
 
             $saleDetails = array_map(function ($detail) {
-                $detail->quantity_text = floor($detail->SaleDetails_TotalQuantity / $detail->per_unit_convert) . ' ' . $detail->Unit_Name . ' ' . $detail->SaleDetails_TotalQuantity % $detail->per_unit_convert . ' ' . $detail->converted_name;
+                $detail->quantity_text = floor($detail->SaleDetails_TotalQuantity / $detail->per_unit_convert) . ' ' . $detail->converted_name . ' ' . $detail->SaleDetails_TotalQuantity % $detail->per_unit_convert . ' ' . $detail->Unit_Name;
                 return $detail;
             }, $saleDetails);
         }
@@ -328,14 +334,13 @@ class Order extends CI_Controller
             left join tbl_bank_accounts ba on ba.account_id = sm.account_id
             left join tbl_brunch br on br.brunch_id = sm.SaleMaster_branchid
             where sm.SaleMaster_branchid = '$branchId'
-            and sm.Status != 'd'
+            $status_sale
             and sm.is_order = 'true'
             $clauses
             order by sm.SaleMaster_SlNo desc
         ")->result();
 
         $res['sales'] = $sales;
-
         echo json_encode($res);
     }
 
@@ -356,6 +361,12 @@ class Order extends CI_Controller
         $data = json_decode($this->input->raw_input_stream);
         $branchId = $this->session->userdata("BRANCHid");
         $clauses = "";
+        $status_detail = " and sd.Status != 'd'";
+        $status_sale = " and sm.Status != 'd'";
+        if (isset($data->Status) && $data->Status != '') {
+            $status_detail = " and sd.Status = '$data->Status'";
+            $status_sale = " and sm.Status = '$data->Status'";
+        }
         if (isset($data->dateFrom) && $data->dateFrom != '' && isset($data->dateTo) && $data->dateTo != '') {
             $clauses .= " and sm.SaleMaster_SaleDate between '$data->dateFrom' and '$data->dateTo'";
         }
@@ -391,7 +402,7 @@ class Order extends CI_Controller
             left join tbl_employee e on e.Employee_SlNo = sm.employee_id
             left join tbl_brunch br on br.brunch_id = sm.SaleMaster_branchid
             where sm.SaleMaster_branchid = '$branchId'
-            and sm.Status = 'p'
+            $status_sale
             and sm.is_order = 'true'
             $clauses
             order by sm.SaleMaster_SlNo desc
@@ -407,7 +418,7 @@ class Order extends CI_Controller
                 join tbl_product p on p.Product_SlNo = sd.Product_IDNo
                 join tbl_productcategory pc on pc.ProductCategory_SlNo = p.ProductCategory_ID
                 where sd.SaleMaster_IDNo = ?
-                and sd.status = 'p'
+                $status_detail
             ", $sale->SaleMaster_SlNo)->result();
         }
 

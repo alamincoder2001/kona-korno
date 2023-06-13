@@ -162,11 +162,11 @@
 								<div class="form-group">
 									<label class="col-xs-3 control-label no-padding-right"> Quantity </label>
 									<div class="col-xs-4">
-										<input type="number" step="0.01" id="quantity" min="0" placeholder="Qty" class="form-control" ref="quantity" v-model="selectedProduct.boxQty" v-on:input="productTotal" autocomplete="off" required />
+										<input type="number" step="0.01" id="quantity" min="0" placeholder="Qty" class="form-control" ref="quantity" v-model="selectedProduct.pcs" v-on:input="productTotal" autocomplete="off" required />
 									</div>
-									<div class="col-xs-1">Pcs</div>
+									<div class="col-xs-1" v-html="selectedProduct.converted_name"></div>
 									<div class="col-xs-4">
-										<input type="number" class="form-control" min="0" v-model="selectedProduct.pcs" v-on:input="productTotal">
+										<input type="number" class="form-control" min="0" v-model="selectedProduct.boxQty" v-on:input="productTotal">
 									</div>
 								</div>
 
@@ -486,6 +486,7 @@
 					display_text: 'Select Product',
 					Product_Name: '',
 					Unit_Name: '',
+					converted_name: 'PCS',
 					quantity: 0,
 					boxQty: 0,
 					pcs: 0,
@@ -639,7 +640,6 @@
 
 					this.productStockText = this.productStock > 0 ? "Available Stock" : "Stock Unavailable";
 				}
-				this.selectedProduct.boxQty = 0;
 
 				this.$refs.quantity.focus();
 			},
@@ -701,6 +701,7 @@
 					display_text: 'Select Product',
 					Product_Name: '',
 					Unit_Name: '',
+					converted_name: 'PCS',
 					quantity: 0,
 					boxQty: 0,
 					pcs: 0,

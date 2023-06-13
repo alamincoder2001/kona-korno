@@ -163,11 +163,11 @@
 								<div class="form-group">
 									<label class="col-xs-3 control-label no-padding-right"> Quantity </label>
 									<div class="col-xs-4">
-										<input type="number" step="0.01" id="quantity" placeholder="Qty" class="form-control" ref="quantity" v-model="selectedProduct.boxQty" v-on:input="productTotal" autocomplete="off" required />
+										<input type="number" step="0.01" id="quantity" placeholder="Qty" class="form-control" ref="quantity" v-model="selectedProduct.pcs" v-on:input="productTotal" autocomplete="off" required />
 									</div>
-									<div class="col-xs-1">Pcs</div>
+									<div class="col-xs-1" v-html="selectedProduct.converted_name"></div>
 									<div class="col-xs-4">
-										<input type="number" class="form-control" min="0" v-model="selectedProduct.pcs" v-on:input="productTotal">
+										<input type="number" class="form-control" min="0" v-model="selectedProduct.boxQty" v-on:input="productTotal">
 									</div>
 								</div>
 
@@ -231,7 +231,9 @@
 							<td>{{ product.productCode }}</td>
 							<td>{{ product.name }}</td>
 							<td>{{ product.categoryName }}</td>
-							<td>{{ product.quantity }}</td>
+							<td>
+								<input type="number" step="1" min="0" v-model="product.quantity" style="width: 70px;" @input="onChangeQty(sl)"/>
+							</td>
 							<td>{{ product.salesRate }}</td>
 							<td>{{ product.total }}</td>
 							<td><a href="" v-on:click.prevent="removeFromCart(sl)"><i class="fa fa-trash"></i></a></td>
@@ -407,9 +409,12 @@
 										<td>
 											<div class="form-group">
 												<div class="col-xs-6">
-													<input type="button" class="btn btn-default btn-sm" value="Order" v-on:click="saveSales" v-bind:disabled="saleOnProgress ? true : false" style="color: black!important;margin-top: 0px;width:100%;padding:5px;font-weight:bold;">
+													<input type="button" class="btn btn-default btn-sm" :value="sales.salesId > 0 ? 'Sales':'Order'" v-on:click="saveSales('a')" v-bind:disabled="saleOnProgress ? true : false" style="color: black!important;margin-top: 0px;width:100%;padding:5px;font-weight:bold;">
 												</div>
-												<div class="col-xs-6">
+												<div class="col-xs-6" v-if="sales.salesId > 0">
+													<input type="button" class="btn btn-warning btn-sm" value="Update Order" v-on:click="saveSales('p')" v-bind:disabled="saleOnProgress ? true : false" style="color: black!important;margin-top: 0px;width:100%;padding:5px;font-weight:bold;">
+												</div>
+												<div class="col-xs-6" v-if="sales.salesId <= 0">
 													<a class="btn btn-info btn-sm" v-bind:href="`/sales/${sales.isService == 'true' ? 'service' : 'product'}`" style="color: black!important;margin-top: 0px;width:100%;padding:5px;font-weight:bold;">New Order</a>
 												</div>
 											</div>
@@ -487,6 +492,7 @@
 					display_text: 'Select Product',
 					Product_Name: '',
 					Unit_Name: '',
+					converted_name: 'PCS',
 					quantity: 0,
 					boxQty: 0,
 					pcs: 0,
@@ -640,8 +646,6 @@
 
 					this.productStockText = this.productStock > 0 ? "Available Stock" : "Stock Unavailable";
 				}
-				this.selectedProduct.boxQty = 0
-
 				this.$refs.quantity.focus();
 			},
 			toggleProductPurchaseRate() {
@@ -700,6 +704,7 @@
 					display_text: 'Select Product',
 					Product_Name: '',
 					Unit_Name: '',
+					converted_name: 'PCS',
 					quantity: 0,
 					boxQty: 0,
 					pcs: 0,
@@ -710,6 +715,13 @@
 				}
 				this.productStock = '';
 				this.productStockText = '';
+			},
+			onChangeQty(sl){
+				this.cart.map(p => {
+					p.total = parseFloat(parseFloat(p.salesRate) * parseFloat(p.quantity)).toFixed(2)
+					return p;
+				});
+				this.calculateTotal();
 			},
 			calculateTotal() {
 				this.sales.subTotal = this.cart.reduce((prev, curr) => {
@@ -734,7 +746,7 @@
 					this.sales.due = (parseFloat(this.sales.total) - parseFloat(this.sales.paid)).toFixed(2);
 				}
 			},
-			async saveSales() {
+			async saveSales(status) {
 				if (this.selectedCustomer.Customer_SlNo == '') {
 					alert('Select Customer');
 					return;
@@ -771,6 +783,10 @@
 
 				this.sales.customerId = this.selectedCustomer.Customer_SlNo;
 				this.sales.salesFrom = this.selectedBranch.brunch_id;
+				
+				if (this.sales.salesId > 0) {
+					this.sales.Status = status;
+				}
 
 				let data = {
 					sales: this.sales,

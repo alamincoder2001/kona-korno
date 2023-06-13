@@ -60,7 +60,7 @@ class Purchase extends CI_Controller
             $res['purchaseDetails'] = $purchaseDetails; 
 
             $purchaseDetails = array_map(function($detail) {
-                $detail->quantity_text = floor($detail->PurchaseDetails_TotalQuantity / $detail->per_unit_convert) . ' ' . $detail->Unit_Name . ' ' . $detail->PurchaseDetails_TotalQuantity % $detail->per_unit_convert . ' ' . $detail->converted_name;
+                $detail->quantity_text = floor($detail->PurchaseDetails_TotalQuantity / $detail->per_unit_convert) . ' ' . $detail->converted_name . ' ' . $detail->PurchaseDetails_TotalQuantity % $detail->per_unit_convert . ' ' . $detail->Unit_Name;
                 return $detail;
             }, $purchaseDetails);
         }
