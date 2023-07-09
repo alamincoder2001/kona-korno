@@ -149,9 +149,9 @@
 								<div class="form-group">
 									<label class="col-xs-4 control-label no-padding-right"> Quantity </label>
 									<div class="col-xs-3">
-										<input type="number" step="0.01" id="quantity" min="0" name="quantity" class="form-control" placeholder="Quantity" ref="quantity" v-model="selectedProduct.pcs" v-on:input="productTotal" required />
+										<input type="number" step="0.01" id="quantity" min="0" name="quantity" class="form-control" placeholder="Quantity" ref="quantity" v-model="selectedProduct.pcs" v-on:input="productTotal" />
 									</div>
-									<div class="col-xs-1" v-html="selectedProduct.converted_name"></div>
+									<div class="col-xs-1" v-html="selectedProduct.converted_name" style="margin-top:3px;"></div>
 									<div class="col-xs-4">
 										<input type="number" class="form-control" min="0" v-model="selectedProduct.boxQty" v-on:input="productTotal">
 									</div>
