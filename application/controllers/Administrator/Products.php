@@ -670,7 +670,7 @@ class Products extends CI_Controller {
                 'a' as sequence,
                 pp.production_products_id as id,
                 p.date,
-                concat('Production - ', p.note) as description,
+                concat('Production - ', p.production_sl) as description,
                 pp.price as rate,
                 pp.quantity as in_quantity,
                 0 as out_quantity    
