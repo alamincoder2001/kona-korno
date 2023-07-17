@@ -56,9 +56,9 @@
                             <th>Date</th>
                             <th>Incharge</th>
                             <th>Shift</th>
-                            <th>Total Cost</th>
                             <th>Product Name</th>
                             <th>Quantity</th>
+                            <th>Total Cost</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -69,9 +69,9 @@
                                 <td>{{ production.date }}</td>
                                 <td>{{ production.incharge_name }}</td>
                                 <td>{{ production.shift }}</td>
-                                <td style="text-align:right;">{{ production.total_cost }}</td>
                                 <td style="text-align:left;">{{ production.products[0].name }}</td>
                                 <td style="text-align:right;">{{ production.products[0].quantity }}</td>
+                                <td style="text-align:right;">{{ parseFloat(production.total_cost).toFixed(2) }}</td>
                                 <td>
                                     <a href="" v-bind:href="`/production_invoice/${production.production_id}`" target="_blank"><i class="fa fa-file-text"></i></a>
                                     <?php if($this->session->userdata('accountType') != 'u'){?>
@@ -90,9 +90,8 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="4" style="text-align: right">Total</td>
+                            <td colspan="6" style="text-align: right">Total</td>
                             <td style="text-align:right;">{{ productions.reduce((p, c) => { return p + parseFloat(c.total_cost)}, 0).toFixed(2) }}</td>
-                            <td colspan="2"></td>
                             <td></td>
                         </tr>
                     </tfoot>
