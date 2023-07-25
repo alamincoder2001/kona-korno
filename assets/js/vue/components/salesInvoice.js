@@ -41,9 +41,10 @@ const salesInvoice = Vue.component('sales-invoice', {
                                     <td>Sl.</td>
                                     <td>Description</td>
                                     <td>Quantity</td>
+                                    <td>Price</td>
+                                    <td>SubTotal</td>
                                     <td>Discount</td>
-                                    <td>Unit Price</td>
-                                    <td>Total</td>
+                                    <td class="text-right">Total</td>
                                 </tr>
                             </thead>
                             <tbody>
@@ -51,8 +52,9 @@ const salesInvoice = Vue.component('sales-invoice', {
                                     <td>{{ sl + 1 }}</td>
                                     <td>{{ product.Product_Name }}</td>
                                     <td>{{ product.quantity_text }}</td>
-                                    <td>{{ product.Discount_amount }}</td>
                                     <td>{{ product.SaleDetails_Rate }}</td>
+                                    <td>{{ parseFloat(parseFloat(product.Discount_amount) + parseFloat(product.SaleDetails_TotalAmount)).toFixed(2) }}</td>
+                                    <td>{{ product.Discount_amount }}</td>
                                     <td align="right">{{ product.SaleDetails_TotalAmount }}</td>
                                 </tr>
                             </tbody>

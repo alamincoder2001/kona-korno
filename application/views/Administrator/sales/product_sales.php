@@ -164,7 +164,7 @@
 									<div class="col-xs-4">
 										<input type="number" step="0.01" id="quantity" min="0" placeholder="Qty" class="form-control" ref="quantity" v-model="selectedProduct.pcs" v-on:input="productTotal" autocomplete="off" />
 									</div>
-									<div class="col-xs-1" style="margin-top:3px;" v-html="selectedProduct.converted_name"></div>
+									<div class="col-xs-1 no-padding-left" style="margin-top:3px;" v-html="selectedProduct.converted_name"></div>
 									<div class="col-xs-4">
 										<input type="number" class="form-control" min="0" v-model="selectedProduct.boxQty" v-on:input="productTotal">
 									</div>
@@ -222,9 +222,10 @@
 							<th style="width:20%;color:#000;">Product Name</th>
 							<th style="width:15%;color:#000;">Category</th>
 							<th style="width:7%;color:#000;">Qty</th>
-							<th style="width:7%;color:#000;">Discount(%)</th>
-							<th style="width:8%;color:#000;">Rate</th>
-							<th style="width:15%;color:#000;">Total Amount</th>
+							<th style="width:8%;color:#000;">Price</th>
+							<th style="width:8%;color:#000;">SubTotal</th>
+							<th style="width:7%;color:#000;">Discount</th>
+							<th style="width:15%;color:#000;">Total</th>
 							<th style="width:10%;color:#000;">Action</th>
 						</tr>
 					</thead>
@@ -235,24 +236,25 @@
 							<td>{{ product.name }}</td>
 							<td>{{ product.categoryName }}</td>
 							<td>{{ product.quantity }}</td>
-							<td>{{ product.discount }}</td>
 							<td>{{ product.salesRate }}</td>
+							<td>{{ parseFloat(parseFloat(product.total) + parseFloat(product.discountAmount)).toFixed(2) }}</td>
+							<td>{{ parseFloat(product.discountAmount).toFixed(2) }}</td>
 							<td>{{ product.total }}</td>
 							<td><a href="" v-on:click.prevent="removeFromCart(sl)"><i class="fa fa-trash"></i></a></td>
 						</tr>
 
 						<tr>
-							<td colspan="9"></td>
+							<td colspan="10"></td>
 						</tr>
 
 						<tr style="font-weight: bold;">
 							<td colspan="6">Note</td>
-							<td colspan="3">Total</td>
+							<td colspan="4">Total</td>
 						</tr>
 
 						<tr>
 							<td colspan="6"><textarea style="width: 100%;font-size:13px;" placeholder="Note" v-model="sales.note"></textarea></td>
-							<td colspan="3" style="padding-top: 15px;font-size:18px;">{{ sales.total }}</td>
+							<td colspan="4" style="padding-top: 15px;font-size:18px;">{{ sales.total }}</td>
 						</tr>
 					</tbody>
 				</table>
@@ -581,16 +583,15 @@
 				let boxQty = this.selectedProduct.boxQty ? this.selectedProduct.per_unit_convert * this.selectedProduct.boxQty : 0;
 				let pcsQty = this.selectedProduct.pcs ? this.selectedProduct.pcs : 0;
 				this.selectedProduct.quantity = parseFloat(boxQty) + parseFloat(pcsQty);
-
+				this.selectedProduct.total = parseFloat(this.selectedProduct.quantity) * parseFloat(this.selectedProduct.Product_SellingPrice);
+				 
 				if (event.target.id == 'discount') {
-					this.selectedProduct.discountAmount = parseFloat((parseFloat(this.selectedProduct.Product_SellingPrice) * parseFloat(this.selectedProduct.discount)) / 100).toFixed(2);
+					this.selectedProduct.discountAmount = parseFloat((parseFloat(this.selectedProduct.total) * parseFloat(this.selectedProduct.discount)) / 100).toFixed(2);
 				}
 				if (event.target.id == 'discountAmount') {
-					this.selectedProduct.discount = parseFloat((parseFloat(this.selectedProduct.discountAmount)*100) / parseFloat(this.selectedProduct.Product_SellingPrice)).toFixed(2);
+					this.selectedProduct.discount = parseFloat((parseFloat(this.selectedProduct.discountAmount)*100) / parseFloat(this.selectedProduct.total)).toFixed(2);
 				}
-				let total = parseFloat(this.selectedProduct.quantity) * parseFloat(this.selectedProduct.Product_SellingPrice);
-				let discountTotal = this.selectedProduct.discountAmount == undefined ? 0 : parseFloat(this.selectedProduct.discountAmount) * this.selectedProduct.quantity;
-				this.selectedProduct.total = parseFloat(total - discountTotal).toFixed(2);
+				this.selectedProduct.total = parseFloat(this.selectedProduct.total - parseFloat(this.selectedProduct.discountAmount == undefined ? 0 : this.selectedProduct.discountAmount)).toFixed(2);
 			},
 			onSalesTypeChange() {
 				this.selectedCustomer = {
@@ -672,7 +673,7 @@
 					boxQty: this.selectedProduct.boxQty,
 					pcs: this.selectedProduct.pcs,
 					discount: this.selectedProduct.discount,
-					discountAmount: this.selectedProduct.discountAmount,
+					discountAmount: this.selectedProduct.discountAmount == undefined ? 0 : this.selectedProduct.discountAmount,
 					total: this.selectedProduct.total,
 					purchaseRate: this.selectedProduct.Product_Purchase_Rate
 				}
