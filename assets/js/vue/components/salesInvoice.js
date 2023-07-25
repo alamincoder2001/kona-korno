@@ -41,6 +41,7 @@ const salesInvoice = Vue.component('sales-invoice', {
                                     <td>Sl.</td>
                                     <td>Description</td>
                                     <td>Quantity</td>
+                                    <td>Discount</td>
                                     <td>Unit Price</td>
                                     <td>Total</td>
                                 </tr>
@@ -50,6 +51,7 @@ const salesInvoice = Vue.component('sales-invoice', {
                                     <td>{{ sl + 1 }}</td>
                                     <td>{{ product.Product_Name }}</td>
                                     <td>{{ product.quantity_text }}</td>
+                                    <td>{{ product.Discount_amount }}</td>
                                     <td>{{ product.SaleDetails_Rate }}</td>
                                     <td align="right">{{ product.SaleDetails_TotalAmount }}</td>
                                 </tr>
@@ -447,7 +449,6 @@ const salesInvoice = Vue.component('sales-invoice', {
             printWindow.focus();
             await new Promise(resolve => setTimeout(resolve, 1000));
             printWindow.print();
-            await new Promise(resolve => setTimeout(resolve, 1000));
             printWindow.close();
         }
     }

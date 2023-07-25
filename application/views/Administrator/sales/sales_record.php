@@ -71,7 +71,12 @@
 					</select>
 				</div>
 
-				<div class="form-group" style="display:none;" v-bind:style="{display: searchType == 'customer' && customers.length > 0 ? '' : 'none'}">
+				<div class="form-group" style="display:none;" v-bind:style="{display: searchType == 'category' && categories.length > 0 ? '' : 'none'}">
+					<label>Category</label>
+					<v-select v-bind:options="categories" v-model="selectedCategory" label="ProductCategory_Name"></v-select>
+				</div>
+				
+				<div class="form-group" style="display:none;" v-bind:style="{display: searchType == 'customer' || searchType == 'category' ? '' : 'none'}">
 					<label>Customer</label>
 					<v-select v-bind:options="customers" v-model="selectedCustomer" label="display_name"></v-select>
 				</div>
@@ -84,11 +89,6 @@
 				<div class="form-group" style="display:none;" v-bind:style="{display: searchType == 'quantity' && products.length > 0 ? '' : 'none'}">
 					<label>Product</label>
 					<v-select v-bind:options="products" v-model="selectedProduct" label="display_text" @input="sales = []"></v-select>
-				</div>
-
-				<div class="form-group" style="display:none;" v-bind:style="{display: searchType == 'category' && categories.length > 0 ? '' : 'none'}">
-					<label>Category</label>
-					<v-select v-bind:options="categories" v-model="selectedCategory" label="ProductCategory_Name"></v-select>
 				</div>
 
 				<div class="form-group" style="display:none;" v-bind:style="{display: searchType == 'user' && users.length > 0 ? '' : 'none'}">
@@ -186,6 +186,14 @@
 							</tr>
 						</template>
 					</tbody>
+					<tfoot>
+						<tr>
+							<th colspan="7">Total</th>
+							<th style="text-align: center;">{{sales.reduce((acc, pre) => {return acc + pre.saleDetails.reduce((ac, pr) => {return ac + +pr.SaleDetails_TotalQuantity},0)},0)}}</th>
+							<th style="text-align: right;">{{sales.reduce((acc, pre) => {return acc + +parseFloat(pre.SaleMaster_TotalSaleAmount)},0).toFixed(2)}}</th>
+							<th></th>
+						</tr>
+					</tfoot>
 				</table>
 
 				<table 
@@ -293,20 +301,29 @@
 								<th>Product Id</th>
 								<th>Product Information</th>
 								<th>Quantity</th>
+								<th>Total</th>
 							</tr>
 						</thead>
 						<tbody>
 							<template v-for="sale in sales">
 								<tr>
-									<td colspan="3" style="text-align:center;background: #ccc;">{{ sale.category_name }}</td>
+									<td colspan="4" style="text-align:center;background: #ccc;">{{ sale.category_name }}</td>
 								</tr>
 								<tr v-for="product in sale.products">
 									<td>{{ product.product_code }}</td>
 									<td>{{ product.product_name }}</td>
 									<td style="text-align:right;">{{ product.quantity }}</td>
+									<td style="text-align:right;">{{ parseFloat(product.total_price).toFixed(2) }}</td>
 								</tr>
 							</template>
 						</tbody>
+						<tfoot>
+							<tr>
+								<th colspan="2">Total</th>
+								<th style="text-align: right;">{{sales.reduce((acc, pre) => {return acc + pre.products.reduce((ac, pr) => {return ac + +pr.quantity},0)},0)}}</th>
+								<th style="text-align: right;">{{sales.reduce((acc, pre) => {return acc + pre.products.reduce((ac, pr) => {return ac + +pr.total_price},0)},0).toFixed(2)}}</th>
+							</tr>
+						</tfoot>
 					</table>
 				</template>
 			</div>
@@ -369,6 +386,7 @@
 				}
 				else if(this.searchType == 'category'){
 					this.getCategories();
+					this.getCustomers();
 				}
 				else if(this.searchType == 'customer'){
 					this.getCustomers();
@@ -403,7 +421,7 @@
 				})
 			},
 			getSearchResult(){
-				if(this.searchType != 'customer'){
+				if(this.searchType != 'customer' && this.searchType != 'category'){
 					this.selectedCustomer = null;
 				}
 
@@ -447,16 +465,12 @@
 						this.sales = res.data.sales;
 					}
 				})
-				.catch(error => {
-					if(error.response){
-						alert(`${error.response.status}, ${error.response.statusText}`);
-					}
-				})
 			},
 			getSaleDetails(){
 				let filter = {
 					categoryId: this.selectedCategory == null || this.selectedCategory.ProductCategory_SlNo == '' ? '' : this.selectedCategory.ProductCategory_SlNo,
 					productId: this.selectedProduct == null || this.selectedProduct.Product_SlNo == '' ? '' : this.selectedProduct.Product_SlNo,
+					customerId: this.selectedCustomer == null || this.selectedCustomer.Customer_SlNo == '' ? '' : this.selectedCustomer.Customer_SlNo,
 					dateFrom: this.dateFrom,
 					dateTo: this.dateTo
 				}
@@ -477,7 +491,8 @@
 											return {
 												product_code: product[0].Product_Code,
 												product_name: product[0].Product_Name,
-												quantity: _.sumBy(product, item => Number(item.SaleDetails_TotalQuantity))
+												quantity: _.sumBy(product, item => Number(item.SaleDetails_TotalQuantity)),
+												total_price: _.sumBy(product, item => Number(item.SaleDetails_TotalAmount)) 
 											}
 										})
 										.value()
@@ -486,11 +501,6 @@
 							.value();
 					}
 					this.sales = sales;
-				})
-				.catch(error => {
-					if(error.response){
-						alert(`${error.response.status}, ${error.response.statusText}`);
-					}
 				})
 			},
 			deleteSale(saleId){
@@ -504,11 +514,6 @@
 					alert(r.message);
 					if(r.success){
 						this.getSalesRecord();
-					}
-				})
-				.catch(error => {
-					if(error.response){
-						alert(`${error.response.status}, ${error.response.statusText}`);
 					}
 				})
 			},
@@ -604,7 +609,6 @@
 				reportWindow.focus();
 				await new Promise(resolve => setTimeout(resolve, 1000));
 				reportWindow.print();
-				await new Promise(resolve => setTimeout(resolve, 1000));
 				reportWindow.close();
 			}
 		}

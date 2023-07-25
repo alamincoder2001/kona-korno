@@ -56,7 +56,7 @@ class Customer extends CI_Controller
             left join tbl_district d on d.District_SlNo = c.area_ID
             where c.status = 'a'
             and c.Customer_Type != 'G'
-            and (c.Customer_brunchid = ? or c.Customer_brunchid = 0)
+            and c.Customer_brunchid = ?
             $customerTypeClause
             order by c.Customer_SlNo desc
         ", $this->session->userdata('BRANCHid'))->result();

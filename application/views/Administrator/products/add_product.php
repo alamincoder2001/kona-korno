@@ -114,6 +114,13 @@
 
 			<div class="col-md-6">
 				<div class="form-group clearfix">
+					<label class="control-label col-md-4">Discount:</label>
+					<div class="col-md-7">
+						<input type="number" class="form-control" v-model="product.discount" required>
+					</div>
+				</div>
+
+				<div class="form-group clearfix">
 					<label class="control-label col-md-4">Re-order level:</label>
 					<div class="col-md-7">
 						<input type="text" class="form-control" v-model="product.Product_ReOrederLevel" required>
@@ -229,6 +236,7 @@
 					per_unit_convert: 0,
 					converted_name: '',
 					vat: 0,
+					discount: 0,
 					is_service: false
 				},
 				products: [],

@@ -170,11 +170,14 @@
 									</div>
 								</div>
 
-								<div class="form-group" style="display:none;">
+								<div class="form-group">
 									<label class="col-xs-3 control-label no-padding-right"> Discount</label>
-									<div class="col-xs-9">
-										<span>(%)</span>
-										<input type="text" id="productDiscount" placeholder="Discount" class="form-control" style="display: inline-block; width: 90%" />
+									<div class="col-xs-5" style="display: flex;">
+										<input type="number" step="0.01" min="0" id="discount" placeholder="Discount" class="form-control" ref="discount" v-model="selectedProduct.discount" v-on:input="productTotal" autocomplete="off" style="width: 80%;" />
+										<button type="button" style="width: 20%;padding: 2px 2px;height: 25px;border:0;">%</button>
+									</div>
+									<div class="col-xs-4 no-padding-left">
+										<input type="text" id="discountAmount" v-model="selectedProduct.discountAmount" v-on:input="productTotal" placeholder="Amount" class="form-control" :readonly="selectedProduct.quantity == undefined || selectedProduct.quantity == 0 ? true : false"/>
 									</div>
 								</div>
 								<div class="form-group">
@@ -219,6 +222,7 @@
 							<th style="width:20%;color:#000;">Product Name</th>
 							<th style="width:15%;color:#000;">Category</th>
 							<th style="width:7%;color:#000;">Qty</th>
+							<th style="width:7%;color:#000;">Discount(%)</th>
 							<th style="width:8%;color:#000;">Rate</th>
 							<th style="width:15%;color:#000;">Total Amount</th>
 							<th style="width:10%;color:#000;">Action</th>
@@ -231,22 +235,23 @@
 							<td>{{ product.name }}</td>
 							<td>{{ product.categoryName }}</td>
 							<td>{{ product.quantity }}</td>
+							<td>{{ product.discount }}</td>
 							<td>{{ product.salesRate }}</td>
 							<td>{{ product.total }}</td>
 							<td><a href="" v-on:click.prevent="removeFromCart(sl)"><i class="fa fa-trash"></i></a></td>
 						</tr>
 
 						<tr>
-							<td colspan="8"></td>
+							<td colspan="9"></td>
 						</tr>
 
 						<tr style="font-weight: bold;">
-							<td colspan="5">Note</td>
+							<td colspan="6">Note</td>
 							<td colspan="3">Total</td>
 						</tr>
 
 						<tr>
-							<td colspan="5"><textarea style="width: 100%;font-size:13px;" placeholder="Note" v-model="sales.note"></textarea></td>
+							<td colspan="6"><textarea style="width: 100%;font-size:13px;" placeholder="Note" v-model="sales.note"></textarea></td>
 							<td colspan="3" style="padding-top: 15px;font-size:18px;">{{ sales.total }}</td>
 						</tr>
 					</tbody>
@@ -577,7 +582,15 @@
 				let pcsQty = this.selectedProduct.pcs ? this.selectedProduct.pcs : 0;
 				this.selectedProduct.quantity = parseFloat(boxQty) + parseFloat(pcsQty);
 
-				this.selectedProduct.total = (parseFloat(this.selectedProduct.quantity) * parseFloat(this.selectedProduct.Product_SellingPrice)).toFixed(2);
+				if (event.target.id == 'discount') {
+					this.selectedProduct.discountAmount = parseFloat((parseFloat(this.selectedProduct.Product_SellingPrice) * parseFloat(this.selectedProduct.discount)) / 100).toFixed(2);
+				}
+				if (event.target.id == 'discountAmount') {
+					this.selectedProduct.discount = parseFloat((parseFloat(this.selectedProduct.discountAmount)*100) / parseFloat(this.selectedProduct.Product_SellingPrice)).toFixed(2);
+				}
+				let total = parseFloat(this.selectedProduct.quantity) * parseFloat(this.selectedProduct.Product_SellingPrice);
+				let discountTotal = this.selectedProduct.discountAmount == undefined ? 0 : parseFloat(this.selectedProduct.discountAmount) * this.selectedProduct.quantity;
+				this.selectedProduct.total = parseFloat(total - discountTotal).toFixed(2);
 			},
 			onSalesTypeChange() {
 				this.selectedCustomer = {
@@ -658,6 +671,8 @@
 					quantity: this.selectedProduct.quantity,
 					boxQty: this.selectedProduct.boxQty,
 					pcs: this.selectedProduct.pcs,
+					discount: this.selectedProduct.discount,
+					discountAmount: this.selectedProduct.discountAmount,
 					total: this.selectedProduct.total,
 					purchaseRate: this.selectedProduct.Product_Purchase_Rate
 				}
@@ -865,6 +880,8 @@
 							salesRate: product.SaleDetails_Rate,
 							vat: product.SaleDetails_Tax,
 							quantity: product.SaleDetails_TotalQuantity,
+							discount: product.SaleDetails_Discount,
+							discountAmount: product.Discount_amount,
 							total: product.SaleDetails_TotalAmount,
 							purchaseRate: product.Purchase_Rate,
 						}
