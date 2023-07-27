@@ -218,13 +218,13 @@
 					<thead>
 						<tr class="">
 							<th style="width:10%;color:#000;">Sl</th>
-							<th style="width:15%;color:#000;">Product Code</th>
 							<th style="width:20%;color:#000;">Product Name</th>
 							<th style="width:15%;color:#000;">Category</th>
 							<th style="width:7%;color:#000;">Qty</th>
 							<th style="width:8%;color:#000;">Price</th>
 							<th style="width:8%;color:#000;">SubTotal</th>
-							<th style="width:7%;color:#000;">Discount</th>
+							<th style="width:7%;color:#000;">Discount(%)</th>
+							<th style="width:7%;color:#000;">Discount Amount</th>
 							<th style="width:15%;color:#000;">Total</th>
 							<th style="width:10%;color:#000;">Action</th>
 						</tr>
@@ -232,12 +232,12 @@
 					<tbody style="display:none;" v-bind:style="{display: cart.length > 0 ? '' : 'none'}">
 						<tr v-for="(product, sl) in cart">
 							<td>{{ sl + 1 }}</td>
-							<td>{{ product.productCode }}</td>
-							<td>{{ product.name }}</td>
+							<td>{{ product.productCode }}-{{ product.name }}</td>
 							<td>{{ product.categoryName }}</td>
 							<td>{{ product.quantity }}</td>
 							<td>{{ product.salesRate }}</td>
 							<td>{{ parseFloat(parseFloat(product.total) + parseFloat(product.discountAmount)).toFixed(2) }}</td>
+							<td>{{ product.discount }}</td>
 							<td>{{ parseFloat(product.discountAmount).toFixed(2) }}</td>
 							<td>{{ product.total }}</td>
 							<td><a href="" v-on:click.prevent="removeFromCart(sl)"><i class="fa fa-trash"></i></a></td>
