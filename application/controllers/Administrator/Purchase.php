@@ -566,14 +566,12 @@ class Purchase extends CI_Controller
 
                 $this->db->query("
                     update tbl_product set 
-                    Product_Purchase_Rate = (((Product_Purchase_Rate * ?) + ?) / ?), 
-                    Product_SellingPrice = ? 
+                    Product_Purchase_Rate = (((Product_Purchase_Rate * ?) + ?) / ?)
                     where Product_SlNo = ?
                 ", [
                     $previousStock,
                     $product->total,
                     ($previousStock + $product->quantity),
-                    $product->salesRate, 
                     $product->productId
                 ]);
             }
@@ -707,14 +705,12 @@ class Purchase extends CI_Controller
 
                 $this->db->query("
                     update tbl_product set 
-                    Product_Purchase_Rate = (((Product_Purchase_Rate * ?) + ?) / ?), 
-                    Product_SellingPrice = ? 
+                    Product_Purchase_Rate = (((Product_Purchase_Rate * ?) + ?) / ?)
                     where Product_SlNo = ?
                 ", [
                     $previousStock,
                     $product->total,
-                    ($previousStock + $product->quantity),
-                    $product->salesRate, 
+                    ($previousStock + $product->quantity), 
                     $product->productId
                 ]);
             }
