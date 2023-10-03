@@ -2,7 +2,6 @@
     .v-select{
 		margin-top:-2.5px;
         float: right;
-        min-width: 180px;
         width: 100%;
         margin-left: 5px;
 	}
@@ -229,70 +228,70 @@
                     <div class="widget-main">
                         <form v-on:submit.prevent="saveProduction">
                             <div class="form-group clearfix">
-                                <label class="col-sm-12 control-label">Production Id</label>
-                                <div class="col-sm-12">
+                                <label class="col-xs-12 control-label">Production Id</label>
+                                <div class="col-xs-12">
                                     <input type="text" class="form-control" placeholder="Production Id" v-model="production.production_sl">
                                 </div>
                             </div>
                             <div class="form-group clearfix">
-                                <label class="col-sm-12 control-label">Date</label>
-                                <div class="col-sm-12">
+                                <label class="col-xs-12 control-label">Date</label>
+                                <div class="col-xs-12">
                                     <input type="date" class="form-control" v-model="production.date" required>
                                 </div>
                             </div>
                             <div class="form-group clearfix">
-                                <label class="col-sm-12 control-label">Incharge</label>
-                                <div class="col-sm-10">
+                                <label class="col-xs-12 control-label">Incharge</label>
+                                <div class="col-xs-10 no-padding-right">
                                     <v-select label="display_name" v-bind:options="employees" v-model="selectedEmployee" placeholder="Select Incharge"></v-select>
                                 </div>
-                                <div class="col-sm-2" style="padding: 0;">
+                                <div class="col-xs-1">
                                     <a href="<?= base_url('employee')?>" class="btn btn-xs btn-danger" style="height: 25px; border: 0; width: 27px; margin-left: -10px;margin-top: -2px;" target="_blank" title="Add New Employee"><i class="fa fa-plus" aria-hidden="true" style="margin-top: 5px;"></i></a>
                                 </div>
                             </div>
                             <div class="form-group clearfix">
-                                <label class="col-sm-12 control-label">Shift</label>
-                                <div class="col-sm-10">
+                                <label class="col-xs-12 control-label">Shift</label>
+                                <div class="col-xs-10 no-padding-right">
                                     <select class="form-control" v-model="production.shift" style="padding:0px 3px;" required>
                                         <option value="">Select Shift</option>
                                         <option v-for="shift in shifts" v-bind:value="shift.name">{{ shift.name }}</option>
                                     </select>
                                 </div>
-                                <div class="col-sm-2" style="padding: 0;">
+                                <div class="col-xs-1">
                                     <a href="<?= base_url('shift')?>" class="btn btn-xs btn-danger" style="height: 25px; border: 0; width: 27px; margin-left: -10px;" target="_blank" title="Add New Shift"><i class="fa fa-plus" aria-hidden="true" style="margin-top: 5px;"></i></a>
                                 </div>
                             </div>
                             <div class="form-group clearfix">
-                                <label class="col-sm-12 control-label">Labour Cost</label>
-                                <div class="col-sm-12">
+                                <label class="col-xs-12 control-label">Labour Cost</label>
+                                <div class="col-xs-12">
                                     <input type="text" class="form-control" v-model="production.labour_cost" v-on:input="calculateTotal">
                                 </div>
                             </div>
                             <div class="form-group clearfix">
-                                <label class="col-sm-12 control-label">Material Cost</label>
-                                <div class="col-sm-12">
+                                <label class="col-xs-12 control-label">Material Cost</label>
+                                <div class="col-xs-12">
                                     <input type="text" class="form-control" v-model="production.material_cost" disabled>
                                 </div>
                             </div>
                             <div class="form-group clearfix">
-                                <label class="col-sm-12 control-label">Other Cost</label>
-                                <div class="col-sm-12">
+                                <label class="col-xs-12 control-label">Other Cost</label>
+                                <div class="col-xs-12">
                                     <input type="text" class="form-control" v-model="production.other_cost" v-on:input="calculateTotal">
                                 </div>
                             </div>
                             <div class="form-group clearfix">
-                                <label class="col-sm-12 control-label"><strong>Total Cost</strong></label>
-                                <div class="col-sm-12">
+                                <label class="col-xs-12 control-label"><strong>Total Cost</strong></label>
+                                <div class="col-xs-12">
                                     <input type="text" class="form-control" v-model="production.total_cost" readonly>
                                 </div>
                             </div>
                             <div class="form-group clearfix">
-                                <label class="col-sm-12 control-label">Note</label>
-                                <div class="col-sm-12">
+                                <label class="col-xs-12 control-label">Note</label>
+                                <div class="col-xs-12">
                                     <textarea class="form-control" placeholder="Note" v-model="production.note"></textarea>
                                 </div>
                             </div>
                             <div class="form-group clearfix">
-                                <div class="col-sm-7 col-sm-offset-5">
+                                <div class="col-xs-7 col-xs-offset-5">
                                     <button type="submit" class="btn btn-success pull-right" v-bind:disabled="productionInProgress ? true : false">Save</button>
                                 </div>
                             </div>

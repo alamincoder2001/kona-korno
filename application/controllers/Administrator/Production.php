@@ -77,12 +77,12 @@ class Production extends CI_Controller{
             foreach($data->products as $product){
                 $productionProduct = array(
                     'production_id' => $productionId,
-                    'product_id' => $product->product_id,
-                    'quantity' => $product->quantity,
-                    'price' => $product->price,
-                    'total' => $product->total,
-                    'status' => 'a',
-                    'branch_id' => $this->sbrunch
+                    'product_id'    => $product->product_id,
+                    'quantity'      => $product->quantity,
+                    'price'         => $product->price,
+                    'total'         => $product->total,
+                    'status'        => 'a',
+                    'branch_id'     => $this->sbrunch
                 );
 
                 $this->db->insert('tbl_production_products', $productionProduct);
@@ -328,7 +328,7 @@ class Production extends CI_Controller{
                 pc.ProductCategory_Name as category_name,
                 u.Unit_Name as unit_name
             from tbl_production_products pp
-            join tbl_product p on p.Product_SlNo = pp.product_id
+            left join tbl_product p on p.Product_SlNo = pp.product_id
             join tbl_productcategory pc on pc.ProductCategory_SlNo = p.ProductCategory_ID
             join tbl_unit u on u.Unit_SlNo = p.unit_id
             where pp.status = 'a'
